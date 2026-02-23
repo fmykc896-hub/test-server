@@ -1,0 +1,10 @@
+stages:
+  - test
+
+hello_ci:
+  stage: test
+  image: alpine:latest
+  script:
+    - echo "GitLab CI is running"
+    - echo "branch = $CI_COMMIT_BRANCH"
+

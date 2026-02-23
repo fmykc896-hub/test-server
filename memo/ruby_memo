@@ -1,0 +1,93 @@
+require "tk"
+require "date"
+
+FILENAME = "gui_memos.txt"
+
+def load_memos
+  return [] unless File.exist?(FILENAME)
+  File.readlines(FILENAME, chomp: true)
+end
+
+def save_memos(memos)
+  File.open(FILENAME, "w") { |f| memos.each { |m| f.puts m } }
+end
+
+memos = load_memos
+
+# メインウィンドウ
+root = TkRoot.new { title "GUIメモ帳（検索・日付対応）" }
+
+# ==== 入力エリア ====
+frame_input = TkFrame.new(root).pack(pady: 5)
+
+entry = TkEntry.new(frame_input, width: 30)
+entry.pack(side: "left", padx: 5)
+
+# ==== 追加ボタン ====
+TkButton.new(frame_input, text: "追加") do
+  command proc {
+    text = entry.get.strip
+    return if text.empty?
+
+    date = Date.today.strftime("%Y-%m-%d")
+    memo = "[#{date}] #{text}"
+
+    memos << memo
+    save_memos(memos)
+
+    entry.delete(0, "end")
+    refresh_list.call
+  }
+end.pack(side: "left")
+
+# ==== 検索エリア ====
+frame_search = TkFrame.new(root).pack(pady: 5)
+
+TkLabel.new(frame_search, text: "検索:").pack(side: "left")
+
+search_entry = TkEntry.new(frame_search, width: 20)
+search_entry.pack(side: "left", padx: 5)
+
+TkLabel.new(frame_search, text: "日付:").pack(side: "left")
+
+date_entry = TkEntry.new(frame_search, width: 12)
+date_entry.pack(side: "left")
+date_entry.insert(0, "YYYY-MM-DD")
+
+# ==== メモ一覧 ====
+listbox = TkListbox.new(root, width: 55, height: 12)
+listbox.pack(pady: 5)
+
+# ==== 削除 ====
+TkButton.new(root, text: "削除") do
+  command proc {
+    index = listbox.curselection.first
+    return unless index
+
+    target = listbox.get(index)
+    memos.delete(target)
+    save_memos(memos)
+    refresh_list.call
+  }
+end.pack(pady: 5)
+
+# ==== 表示更新 ====
+refresh_list = proc do
+  keyword = search_entry.get
+  date_filter = date_entry.get
+
+  listbox.delete(0, "end")
+
+  memos.each do |memo|
+    next if !keyword.empty? && !memo.include?(keyword)
+    next if date_filter.match?(/\d{4}-\d{2}-\d{2}/) && !memo.include?("[#{date_filter}]")
+    listbox.insert("end", memo)
+  end
+end
+
+# 検索入力で即反映
+search_entry.bind("KeyRelease") { refresh_list.call }
+date_entry.bind("KeyRelease") { refresh_list.call }
+
+refresh_list.call
+Tk.mainloop

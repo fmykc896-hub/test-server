@@ -1,0 +1,14 @@
+
+117 B
+ # OS
+.DS_Store
+# Docker
+.env
+# Logs
+*.log
+# Editor
+*.swp
+# App generated files
+app/live/
+app/test/
+app/feature/

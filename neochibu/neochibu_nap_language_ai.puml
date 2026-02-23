@@ -1,0 +1,23 @@
+@startuml Nap_language_AI
+title Nap x Language x AI Translation Flow
+
+start
+:ユーザーが多言語ルームを選択;
+:希望言語を設定(例: JP->EN);
+:AI翻訳をONにする;
+
+fork
+  :BGM/子守歌を再生(選択言語);
+fork again
+  :会話/読み上げをAIが翻訳し出力;
+end fork
+
+if (居眠り/就寝?) then (Yes)
+  :音量や周波数を自動調整(安眠誘導);
+endif
+
+:セッション終了-> 要約/単語リスト生成;
+:学習ログ(暗号化)を保存;
+stop
+
+@enduml

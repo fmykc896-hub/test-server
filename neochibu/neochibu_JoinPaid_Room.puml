@@ -1,0 +1,41 @@
+@startuml join
+title Sequence - Join Paid Room (AI Chat) and Pay
+
+participant User
+participant FE as "Frontend"
+participant BE as "Backend API"
+participant ETH as "Ethereum"
+participant AI as "AI Engine (Local)"
+participant RTC as "WebRTC"
+
+User -> FE : ルーム選択(有料/AI)
+FE -> BE : GET /rooms/{id} (詳細/料金)
+BE --> FE : ルーム情報(料金/課金方式)
+
+User -> FE : 入室ボタン + Wallet署名
+FE -> ETH : 支払いTx送信(入室or時間課金)
+ETH --> FE : Txハッシュ/Confirmed
+
+FE -> BE : POST /sessions (roomId, txHash)
+BE -> ETH : Tx検証(イベント/金額/受益者)
+ETH --> BE : OK
+BE --> FE : sessionId, signaling情報
+
+FE -> RTC : Join(room/session)
+FE -> AI : 開始(ローカル推論/翻訳)
+AI --> FE : 応答/訳文(ローカル)
+
+== セッション中 ==
+User <-> FE : 会話(音声/テキスト)
+FE <-> RTC : Media双方向
+FE <-> AI : 要約/補助/翻訳
+
+== 終了 ==
+User -> FE : セッション終了
+FE -> BE : PATCH /sessions/{id} (end)
+BE --> FE : OK
+User -> FE : 評価入力(星/コメント)
+FE -> BE : POST /ratings
+BE --> FE : 保存OK
+
+@enduml

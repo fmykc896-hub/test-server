@@ -1,0 +1,36 @@
+@startuml systemcontext
+title neochibu - System Context
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam wrapWidth 200
+skinparam defaultTextAlignment left
+
+actor "User\n(利用者)" as User
+actor "Room Host\n(提供者/カウンセラー等)" as Host
+actor "Admin/DAO\n(運営・ガバナンス)" as Admin
+
+node "neochibu Frontend\n(React/Next.js)" as FE
+node "neochibu Backend API\n(Node.js)" as BE
+node "WebRTC Media\n(SFU/Signaling)" as RTC
+node "AI Engine\n(Local-first / Browser/Edge)" as AI
+cloud "IPFS\n(ログ/一部コンテンツ)" as IPFS
+cloud "Ethereum\n(ERC-20 Coin, SC)" as ETH
+
+User --> FE : 利用/入室/支払い/評価
+Host --> FE : ルーム作成/設定/収益確認
+Admin --> BE : 監視/設定/統計
+
+FE <--> BE : REST/GraphQL API
+FE <--> RTC : Signaling / Media
+BE <--> RTC : Session Mgmt
+FE <--> AI : ローカル推論/翻訳
+BE <--> IPFS : コンテンツ/ログ保存
+FE <--> ETH : Wallet接続(Ethers.js)
+BE <--> ETH : 決済確認/Webhook的連携
+
+rectangle "Separate Gateway\n(Adult 18+ Gate)" as GATE
+User --> GATE : 年齢確認(必須)
+GATE --> FE : OK/NG リダイレクト
+
+@enduml
